@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'roboto-regular', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .admin-panel {
+            background-color: #fff;
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .header {
+            background-color: #192139;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .menuPanel{
+            min-width: 18vw !important;
+            background-color: #192139;
+        }
+
+        .menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu li {
+            text-align: left;
+            vertical-align: middle;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            color: white;
+            margin: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .menu li:hover {
+            background-color: #253155;
+            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.55);
+        }
+
+        .chat-history {
+            width: 83vw !important;
+            display: flex;
+            flex-direction: column;
+            overflow-y: scroll;
+        }
+
+        #chat-history {
+            background-color: #253155;
+            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.55);
+        }
+
+        .analytics {
+            width: 83vw !important;
+            display: none;
+            flex-direction: column;
+            overflow-y: hidden;
+        }
+
+        .product {
+            width: 83vw !important;
+            display: none;
+            flex-direction: column;
+            overflow-y: hidden;
+        }
+
+        .product form{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: left;
+            height: 100%;
+        }
+
+        .product button{
+            padding: 10px;
+            margin: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #c6c8c9;
+            background-color: #253155;
+            color: white;
+            cursor: pointer;
+        }
+        form input{
+            padding: 10px;
+            margin: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #c6c8c9;
+        }
+
+        .formrow{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .formrow div{
+            max-width: 40rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .formrow label{
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-table{
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .chat-table th, .chat-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .search-table{
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .search-table th, .search-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .topAnalytics{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .topAnalytics div{
+            display: flex;
+            flex-direction: row;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .search{
+            overflow-y: scroll;
+        }
+        .searchInput{
+            display: flex;
+            margin: 1rem 2rem 1rem 2rem;
+            padding: 10px;
+            box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.55);
+            border-radius: 0.5rem;
+        }
+
+        .searchInput div{
+            width: 100%;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+        }
+
+        .searchInput input{
+            padding: 10px 60px 10px 60px;
+            border: none;
+            background-color: #e4e8e9;
+            border-radius: 2rem;
+            margin: 0 1rem 0 1rem;
+        }
+
+        .searchInput button{
+            padding: 10px 20px 10px 20px;
+            border: 1px solid black;
+            background-color: #e4e8e9;
+            border-radius: 2rem;
+            margin: 0 1rem 0 1rem;
+            height: fit-content;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+</head>
+<body>
+    <div class="admin-panel">
+        <div class="menuPanel">
+            <div class="header">Admin Panel</div>
+            <ul class="menu">
+                <li id="chat-history"><img src="./history.png" alt="" style="height: 24px; margin-left: 10px; margin-right: 10px;">Chat History</li>
+                <li id="product"><img src="./Tshirt.png" alt="" style="height: 24px; margin-left: 10px; margin-right: 10px;">New Product</li>
+                <li id="analytics"><img src="./analytics.png" alt="" style="height: 24px; margin-left: 10px; margin-right: 10px;">Analytics</li>
+            </ul>
+        </div>
+        <div class="chat-history">
+            <table class="chat-table" id="chat-table">
+                <thead>
+                    <tr>
+                        <th>Sender</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Chat messages will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+        <div class="product">
+                <form>
+                    <h2 style="text-align: center;">Add a New Product</h2>
+                    <div class="formrow">
+                        <div>
+                            <label for="product-name" style="width: 10rem;">Product Name:</label>
+                            <input type="text" id="product-name" name="product-name">
+                        </div>
+                    </div>
+                    <div class="formrow">
+                        <div>
+                            <label for="price" style="width: 10rem;">Price:</label>
+                            <input type="number" id="price" name="price">
+                        </div>
+                    </div>
+                    <div class="formrow">
+                        <label for="description" style="width: 10rem;">Description:</label>
+                        <input type="text" id="Description" name="Description">
+                    </div>
+                    <div class="formrow">
+                        <label for="material" style="width: 10rem;">Material:</label>
+                        <input type="text" id="material" name="material">
+                    </div>
+                    <div class="formrow">
+                        <label for="Size" style="width: 10rem;">Size:</label>
+                        <input type="number" id="Size" name="Size">
+                    </div>
+                    <button type="button" onclick="submitProductForm()">Submit</button>
+                </form>
+        </div>
+        <div class="analytics">
+            <div class="topAnalytics">
+                <div>
+                    <div class="userQuery" style="display: flex; flex-direction: column;">
+                        <p style="font-weight: bold;">Total User Queries</p>
+                        <p id="totalQuery"></p>
+                    </div>
+                    <div class="userReq" style="display: flex; flex-direction: column;">
+                        <p style="font-weight: bold;">Total words Genrated</p>
+                        <p id="totalWords"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="search">
+                <div class="searchInput">
+                    <p style="width: 100%; font-weight: bold; margin-left: 1rem;">Search User Queries</p>
+                    <div>
+                        <input type="text" id="search-input" placeholder="Search for messages...">
+                        <button id="search-button">Search</button>
+                    </div>
+                </div>
+                <table class="search-table" id="search-table">
+                    <thead>
+                        <tr>
+                            <th>Sender</th>
+                            <th>Message</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- search messages will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to submit the product form
+        function submitProductForm() {
+        // Get input values from the form
+        const productName = document.getElementById('product-name').value;
+        const price = document.getElementById('price').value;
+        const description = document.getElementById('Description').value;  // Updated ID here
+        const material = document.getElementById('material').value;
+        const Size = document.getElementById('Size').value;
+        // Create a string with the input values
+        const productInfoString = `Product Name: ${productName}, Price: ${price}, Description: ${description}, Material: ${material}, Size: ${Size}`;
+
+        // Save the string to local storage
+        localStorage.setItem('productInfo', productInfoString);
+
+        // You can display a confirmation message or perform additional actions if needed
+        alert('Product information saved to local storage!');
+    }
+
+        // Initialize Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyAEoO8guGrJH-ZtGaa_r9tBoBzNvpRU2c8",
+            authDomain: "gat-hack24.firebaseapp.com",
+            projectId: "gat-hack24",
+            storageBucket: "gat-hack24.appspot.com",
+            messagingSenderId: "311743203944",
+            appId: "1:311743203944:web:6c63e7bf18b1f4554f89dd",
+            measurementId: "G-MVBJYB0KPT",
+            databaseURL: "https://gat-hack24-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        const chatTableBody = document.getElementById('chat-table').getElementsByTagName('tbody')[0];
+        let messageDataArray = []; // Array to store message data as JSON objects
+        let totalQuery = 0;
+        // Function to add a message to the chat history array
+        function addMessageToTable(sender, message) {
+            // Create a JSON object representing the message
+            const messageData = {
+                sender: sender,
+                message: message
+            };
+            
+            totalQuery++;
+            document.getElementById('totalQuery').innerHTML = totalQuery;
+            
+            // Count the words in the message
+            const words = message.split(' ');
+            const wordCount = words.length;
+            
+            // Add the word count to a totalWords variable
+            let totalWords = document.getElementById('totalWords').innerHTML;
+            totalWords = parseInt(totalWords) || 0;
+            totalWords += wordCount;
+            document.getElementById('totalWords').innerHTML = totalWords;
+            
+            // Push the message JSON object into the array
+            messageDataArray.push(messageData);
+
+            // After adding the message, update the chat history display
+            updateChatHistoryDisplay();
+        }
+
+        console.log(messageDataArray);
+
+        // Function to update the chat history display using the message data array
+        function updateChatHistoryDisplay() {
+            // Clear existing content in the chat table
+            chatTableBody.innerHTML = '';
+
+            // Loop through the message data array and append each message to the table
+            messageDataArray.forEach(function(messageData) {
+                const row = chatTableBody.insertRow();
+                const senderCell = row.insertCell(0);
+                const messageCell = row.insertCell(1);
+
+                senderCell.textContent = messageData.sender;
+                messageCell.textContent = messageData.message;
+            });
+        }
+
+        document.getElementById('search-button').addEventListener('click', function() {
+            const searchInput = document.getElementById('search-input').value.toLowerCase();
+            const searchTableBody = document.getElementById('search-table').getElementsByTagName('tbody')[0];
+
+            // Clear existing content in the search table
+            searchTableBody.innerHTML = '';
+
+            // Filter the messageDataArray based on the search input
+            const searchResults = messageDataArray.filter(function(messageData) {
+                return messageData.message.toLowerCase().includes(searchInput) || messageData.sender.toLowerCase().includes(searchInput);
+            });
+
+            // Loop through the search results and append each message to the table
+            searchResults.forEach(function(messageData) {
+                const row = searchTableBody.insertRow();
+                const senderCell = row.insertCell(0);
+                const messageCell = row.insertCell(1);
+
+                senderCell.textContent = messageData.sender;
+                messageCell.textContent = messageData.message;
+            });
+        });
+
+        // Listen for changes in the 'messages' node
+        firebase.database().ref('messages').on('child_added', function(snapshot) {
+            const messageData = snapshot.val();
+            addMessageToTable(messageData.sender, messageData.message);
+        });
+    </script>
+    <script>
+           document.getElementById('analytics').addEventListener('click', function() {
+            document.getElementsByClassName('chat-history')[0].style.display = 'none';
+            document.getElementsByClassName('analytics')[0].style.display = 'flex';
+            document.getElementsByClassName('product')[0].style.display = 'none';
+            document.getElementById('analytics').style.backgroundColor = '#253155';
+            document.getElementById('analytics').style.boxShadow = '0px 0px 10px 0px rgba(0, 0, 0, 0.55)';
+            document.getElementById('chat-history').style.backgroundColor = 'transparent';
+            document.getElementById('chat-history').style.boxShadow = '0px 0px 10px 0px rgba(0, 0, 0, 0)';
+            document.getElementById('product').style.backgroundColor = 'transparent';
+            document.getElementById('product').style.boxShadow = '0px 0px 10px 0px rgba(0, 0, 0, 0)';
+        });
+        document.getElementById('chat-history').addEventListener('click', function() {
+            document.getElementsByClassName('chat-history')[0].style.display = 'flex';
+            document.getElementsByClassName('analytics')[0].style.display = 'none';
+            document.getElementsByClassName('product')[0].style.display = 'none';
+            document.getElementById('chat-history').style.backgroundColor = '#253155';
+            document.getElementById('chat-history').style.boxShadow = '0px 0px 10px 0px rgba(0, 0, 0, 0.55)';
+            document.getElementById('analytics').style.backgroundColor = 'transparent';
+            document.getElementById('analytics').style.boxShadow = '0px 0px 10px 0px rgba(0, 0, 0, 0)';
+            document.getElementById('product').style.backgroundColor = 'transparent';
+            document.getElementById('product').style.boxShadow = '0px 0px 10px 0px rgba(0, 0, 0, 0)';
+        });
+        document.getElementById('product').addEventListener('click', function() {
+            document.getElementsByClassName('product')[0].style.display = 'flex';
+            document.getElementsByClassName('analytics')[0].style.display = 'none';
+            document.getElementsByClassName('chat-history')[0].style.display = 'none';
+            document.getElementById('product').style.backgroundColor = '#253155';
+            document.getElementById('product').style.boxShadow = '0px 0px 10px 0px rgba(0, 0, 0, 0.55)';
+            document.getElementById('analytics').style.backgroundColor = 'transparent';
+            document.getElementById('analytics').style.boxShadow = '0px 0px 10px 0px rgba(0, 0, 0, 0)';
+            document.getElementById('chat-history').style.backgroundColor = 'transparent';
+            document.getElementById('chat-history').style.boxShadow = '0px 0px 10px 0px rgba(0, 0, 0, 0)';
+        });
+    </script>
+</body>
+</html>

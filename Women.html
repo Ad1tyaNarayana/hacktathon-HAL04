@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Amélie</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    #chat-container {
+        z-index: 1000;
+        height: 600px;
+        overflow-y: scroll;
+        border: 1px solid #ccc;
+        padding: 10px;
+        display: none;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        background-color: white;
+        width: 300px;
+        border-radius: 10px;
+        flex-direction: column;
+        bottom: 1rem;
+        right: 1rem;
+    }
+
+    #chat-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #0084ff;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+    }
+
+    #close-button {
+      position: absolute;
+      right: 5px;
+      top: 10px;
+      background-color: #ccc;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      font-size: 16px;
+      line-height: 20px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    #message-input {
+        width: 70%;
+        padding: 5px 10px 5px 10px;
+        border-radius: 2rem;
+        border: 1px solid #d6d7d7;
+        background-color: #e4e8e9;
+    }
+    #messageInput{
+        display: flex;
+        flex-direction: row;
+        position: absolute;
+        bottom: 0;
+        margin-bottom: 0.5rem;
+        align-items: center;
+    }
+
+    #send-button {
+        padding: 5px;
+        cursor: pointer;
+        width: auto;
+        background-color: lightblue;
+        border: 1px solid #d6d7d7;
+        margin: 5px;
+        border-radius: 50%;
+        height: 40px;
+    }
+
+    #send-button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+    .mic-icon {
+        width: 40px;
+        height: 40px;
+        background-color: lightblue;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+    #message-container{
+        height: 90%;
+        overflow-y: scroll;
+    }
+    #message-container div {
+        display: block;
+        width: 100%;
+        overflow-wrap: break-word;
+        margin-bottom: 10px;
+    }
+</style>
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+</head>
+
+<body>
+  
+  <button id="chat-button" onclick="toggleChat()" style="z-index: 1000;">
+    <img src="./try-me.png" style="position: absolute; width: 4.6rem; bottom: 5rem;">
+    <img src="./robot.png" alt="" style="width: 4rem;">
+  </button>
+
+  <div id="chat-container">
+    <button id="close-button" onclick="toggleChat()">X</button>
+    <div id="message-container"></div>
+    <div id="messageInput">
+        <input type="text" id="message-input" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+        <button id="send-button" onclick="sendMessage()"><img src="./assets/img/right-arrow.png" style="width: 1.5rem;" alt=""></button>
+        <div class="mic-icon" id="mic-icon" onclick="toggleListening()">
+            <img id="mic-img" src="./icons8-microphone-24.png" alt="Microphone">
+        </div>
+    </div>
+  </div>
+  <!-- ======= Top Bar ======= -->
+  <section id="topbar" class="d-flex align-items-center">
+  </section>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="d-flex align-items-center">
+    <div class="container d-flex justify-content-between align-items-center">
+
+      <div class="logo">
+        <h1><a href="index.html">Amélie</a></h1>
+        <!-- Uncomment below if you prefer to use an image logo -->
+        <!-- <a href="index.html"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
+      </div>
+
+      <nav id="navbar" class="navbar">
+        <ul>
+          <li><a href="index.html">Men</a></li>
+          <li><a href="Women.html">Women</a></li>
+          <li><a href="Kids.html">Kids</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav><!-- .navbar -->
+
+    </div>
+  </header><!-- End Header -->
+
+  <main id="main">
+
+    <!-- ======= Breadcrumbs ======= -->
+    <section id="breadcrumbs" class="breadcrumbs">
+      <div class="container">
+
+        <ol>
+          <li><a href="index.html">Men</a></li>
+          <li>Women</li>
+        </ol>
+        <h2>Women</h2>
+
+      </div>
+    </section><!-- End Breadcrumbs -->
+
+    <!-- ======= Services Section ======= -->
+    <section id="services" class="services">
+      <div class="container">
+
+        <div class="row">
+          <div class="col-lg-4 col-md-6 d-flex align-items-stretch"style="flex-direction: column; text-align: center;">
+            <p>Black Baggy pants</p>
+            <div class="icon-box">
+              <img src="assets/img/team/a.jpg" alt="">
+            <p>rs.725</p>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6 d-flex align-items-stretch mt-4 mt-md-0"style="flex-direction: column;text-align: center;">
+            <p>Slim Jeans</p>
+            <div class="icon-box">
+              <img src="assets/img/team/b.jpg" alt="">
+            <p>rs.1000</p>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6 d-flex align-items-stretch mt-4 mt-lg-0"style="flex-direction: column;text-align: center;">
+            <p>Green top</p>
+            <div class="icon-box">
+              <img src="assets/img/team/c.jpg" alt="">
+            <p>rs.8825</p>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6 d-flex align-items-stretch mt-4"style="flex-direction: column;text-align: center;">
+            <p>greener top</p>
+            <div class="icon-box">
+              <img src="assets/img/team/c.jpg" alt="">
+            <p>rs.125</p>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6 d-flex align-items-stretch mt-4"style="flex-direction: column;text-align: center;">
+            <p>black crop</p>
+            <div class="icon-box">
+              <img src="assets/img/team/d.jpg" alt="">
+            <p>rs.225</p>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6 d-flex align-items-stretch mt-4"style="flex-direction: column;text-align: center;">
+            <p>pink dress</p>
+            <div class="icon-box">
+              <img src="assets/img/team/e.jpg" alt="">
+            <p>rs.425</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section><!-- End Services Section -->
+
+    <!-- ======= Counts Section ======= -->
+    <section id="counts" class="counts">
+      <div class="container">
+
+        <div class="row no-gutters">
+
+          <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
+            <div class="count-box">
+              <i class="bi bi-emoji-smile"></i>
+              <span data-purecounter-start="0" data-purecounter-end="232" data-purecounter-duration="1" class="purecounter"></span>
+              <p><strong>Happy Clients</strong></p>
+              <a href="#">Find out more &raquo;</a>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
+            <div class="count-box">
+              <i class="bi bi-journal-richtext"></i>
+              <span data-purecounter-start="0" data-purecounter-end="521" data-purecounter-duration="1" class="purecounter"></span>
+              <p><strong>Projects</strong></p>
+              <a href="#">Find out more &raquo;</a>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
+            <div class="count-box">
+              <i class="bi bi-headset"></i>
+              <span data-purecounter-start="0" data-purecounter-end="1463" data-purecounter-duration="1" class="purecounter"></span>
+              <p><strong>Hours Of Support</strong></p>
+              <a href="#">Find out more &raquo;</a>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch">
+            <div class="count-box">
+              <i class="bi bi-people"></i>
+              <span data-purecounter-start="0" data-purecounter-end="15" data-purecounter-duration="1" class="purecounter"></span>
+              <p><strong>Hard Workers</strong></p>
+              <a href="#">Find out more &raquo;</a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section><!-- End Counts Section -->
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer">
+
+    <div class="footer-newsletter">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-6">
+            <h4>Our Newsletter</h4>
+            <p>"Explore fall trends, enjoy exclusive offers, and meet our designers at Amélie. Stay fashion-forward with personalized style tips and a sneak peek into new arrivals. Connect with us on social media!"</p>
+          </div>
+          <div class="col-lg-6">
+            <form action="">
+              <input type="email" name="email"><input type="submit" value="Subscribe">
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-top">
+      <div class="container">
+        <div class="row">
+
+          <div class="col-lg-3 col-md-6 footer-links">
+            <h4>Useful Links</h4>
+            <ul>
+              <li><i class="bx bx-chevron-right"></i> <a href="#">Men</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="#">Women</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="#">Kids</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="#">Terms of service</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="#">Privacy policy</a></li>
+            </ul>
+          </div>
+
+          <div class="col-lg-3 col-md-6 footer-links">
+            <h4>Our Services</h4>
+            <ul>
+              <li><i class="bx bx-chevron-right"></i> <a href="#">clothing</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="#">Footwear</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="#">Accessories</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="#">Eyewear</a></li>
+            </ul>
+          </div>
+
+          <div class="col-lg-3 col-md-6 footer-contact">
+            <h4>Contact Us</h4>
+            <p>
+              A108 Adam Street <br>
+              New York, NY 535022<br>
+              United States <br><br>
+              <strong>Phone:</strong> +1 5589 55488 55<br>
+              <strong>Email:</strong> info@Amélie.com<br>
+            </p>
+
+          </div>
+
+          <div class="col-lg-3 col-md-6 footer-info">
+            <h3>About Amélie</h3>
+            <p>At Amélie, we believe in the power of self-expression through fashion. Our website is a haven for fashion enthusiasts seeking more than just clothing—it's a celebration of individuality, creativity, and the artistry of well-crafted garments.</p>
+            <div class="social-links mt-3">
+              <a href="#" class="twitter"><i class="bx bxl-twitter"></i></a>
+              <a href="#" class="facebook"><i class="bx bxl-facebook"></i></a>
+              <a href="#" class="instagram"><i class="bx bxl-instagram"></i></a>
+              <a href="#" class="google-plus"><i class="bx bxl-skype"></i></a>
+              <a href="#" class="linkedin"><i class="bx bxl-linkedin"></i></a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="copyright">
+        &copy; Copyright <strong><span>Amélie</span></strong>. All Rights Reserved
+      </div>
+      <div class="credits">
+        Designed by Team HAL 04</a>
+      </div>
+    </div>
+  </footer><!-- End Footer -->
+
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><img src="./assets/img/up-arrow.png" style="height: 2rem;" alt=""></a>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/vendor/waypoints/noframework.waypoints.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+  <script>
+    // Get the elements
+    let chatContainer = document.getElementById('chat-container');
+    let messageContainer = document.getElementById('message-container');
+   // Define the toggle function
+   function toggleChat() {
+       chatContainer.style.display = (chatContainer.style.display === 'none' || chatContainer.style.display === '') ? 'flex' : 'none';
+   }
+   // Initialize Firebase
+   var firebaseConfig = {
+       apiKey: "AIzaSyAEoO8guGrJH-ZtGaa_r9tBoBzNvpRU2c8",
+       authDomain: "gat-hack24.firebaseapp.com",
+       projectId: "gat-hack24",
+       storageBucket: "gat-hack24.appspot.com",
+       messagingSenderId: "311743203944",
+       appId: "1:311743203944:web:6c63e7bf18b1f4554f89dd",
+       measurementId: "G-MVBJYB0KPT",
+       databaseURL: "https://gat-hack24-default-rtdb.asia-southeast1.firebasedatabase.app"
+   };
+   firebase.initializeApp(firebaseConfig);
+  
+   const messageInput = document.getElementById('message-input');
+   let isChatbotProcessing = false;
+   let stopProcessing = false;
+   let abortController = null;
+  
+   // Add event listener for "Enter" key press
+   function handleKeyPress(event) {
+       if (event.key === 'Enter') {
+           event.preventDefault();  // Prevent form submission
+           sendMessage();
+           messageInput.value = '';  // Clear the input field
+       }
+   }
+  
+   async function sendMessage() {
+       const sendButton = document.getElementById('send-button');
+       const message = messageInput.value;
+  
+       appendMessage('User', message);
+       pushMessage('User', message);  // Push user message to Firebase
+  
+       // Check if the chatbot is currently processing a message
+       if (isChatbotProcessing || message.trim() === '') {
+           return;
+       }
+  
+       sendButton.textContent = 'Stop';  // Change the button text to 'Stop'
+       sendButton.onclick = stopMessage;  // Change the button action to stopMessage
+       isChatbotProcessing = true;
+       stopProcessing = false;
+  
+       try {
+           abortController = new AbortController();  // Create a new AbortController
+  
+           const response = await fetch('http://localhost:11434/api/generate', {
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/json',
+               },
+               body: JSON.stringify({
+                   model: "llama2",
+                   prompt: message,
+                   system: `You are a chatbot that simulates a Sales Manager for the company "Amélie".Your activity is to provide information related to only Amélie.Don’t justify your answers. Don’t give information not mentioned in the CONTEXT INFORMATION.Consider this dataset as your ONLY source for INFORMATION.For men, there's the classic Roadstar Men's Cotton Polo T-shirt priced at ₹599, available in sizes S to XXL, ensuring comfort with its pure cotton material. Women can enjoy the seamless comfort of the Jockey Women's Seamless Bra priced at ₹499, available in sizes S to XXL, blending cotton and polyester for all-day support. Jack & Jones presents the stylish Jack & Jones Men's Denim Jeans at ₹899, available in sizes S to XXL, crafted from high-quality denim fabric. Kids can embrace fun with the Canlatril Kids' Graphic Print T-shirt priced at ₹399, available in sizes XS to M, made from a soft and durable synthetic cotton blend. Active women can stay comfortable in the HRX Women's Active Leggings priced at ₹699, available in sizes S to XXL, designed with polyester for workouts and everyday wear. Purple State offers the cozy Purple State Men's V-neck Sweater priced at ₹799, available in sizes S to XXL, crafted from pure cotton for layering in colder weather. Adidas presents the sporty Adidas Kids' Track Pants priced at ₹499, available in sizes XS to M, featuring the iconic three-stripe design and made from a soft and durable cotton blend. For women, there's the trendy Roadstar Women's Printed Top at ₹399, available in sizes S to XXL, made from a lightweight synthetic fabric. Men can stay comfortable all day in the Jockey Men's Boxer Briefs priced at ₹349, available in sizes S to XXL, made from a soft cotton blend. Women can flaunt style in the Jack & Jones Women's High-waisted Shorts at ₹699, available in sizes S to XXL, made from pure cotton. Kids can stay warm in the Canlatril Kids' Hooded Sweatshirt priced at ₹499, available in sizes XS to M, made from a soft synthetic cotton blend. Men can stay active in the HRX Men's Sports Shorts priced at ₹499, available in sizes S to XXL, crafted from quick-dry polyester fabric. Women can layer up with the Purple State Women's Knit Cardigan at ₹899, available in sizes S to XXL, made from a blend of cotton and polyester. Lastly, kids can enjoy comfort and style in the Adidas Kids' Sneakers priced at ₹799, available in sizes XS to M, made from a soft cotton blend. Additionally, men can opt for the breathable Roadstar Men's Checked Shirt priced at ₹299, available in sizes S to XXL, made from a breathable cotton fabric ${localStorage.getItem('productInfo') ? JSON.stringify(localStorage.getItem('productInfo')) : {}}`, 
+               }),
+               signal: abortController.signal,  // Pass the AbortSignal to the fetch request
+           });
+  
+           if (!response.ok) {
+               throw new Error(`HTTP error! Status: ${response.status}`);
+           }
+  
+           const reader = response.body.getReader();
+           let result = await reader.read();
+  
+           while (!result.done && !stopProcessing) {
+               // Assuming the stream contains UTF-8 encoded JSON
+               const jsonResponse = JSON.parse(new TextDecoder().decode(result.value));
+               handleResponse(jsonResponse);
+  
+               result = await reader.read();
+           }
+  
+       } catch (error) {
+           if (error.name === 'AbortError') {
+               console.log('Fetch request was aborted');
+           } else {
+               console.error('Error:', error);
+               appendMessage('Chatbot', 'An error occurred while processing your request.');
+           }
+       } finally {
+           // Enable the send button, reset the processing flag, and clear the input field
+           sendButton.textContent = 'Send';  // Change the button text back to 'Send'
+           sendButton.onclick = sendMessage;  // Change the button action back to sendMessage
+           isChatbotProcessing = false;
+           messageInput.value = '';  // Clear the input field
+  
+           abortController = null;  // Reset the AbortController
+       }
+   }
+  
+   function stopMessage() {
+       if (abortController) {
+           abortController.abort();  // Abort the fetch request
+           currentMessageElement = null;
+       }
+  
+       stopProcessing = true;
+   }
+  
+   let currentMessageElement = null;
+  
+   function handleResponse(response) {
+       if (response.done && response.context && response.context.length > 0) {
+           // appendMessage('Chatbot', `Total Duration: ${response.total_duration} ms`);
+           // appendMessage('Chatbot', `Load Duration: ${response.load_duration} ms`);
+           // appendMessage('Chatbot', `Prompt Evaluation Count: ${response.prompt_eval_count}`);
+           // ... Add more details as needed
+       }
+  
+       if (currentMessageElement) {
+           currentMessageElement.childNodes[1].nodeValue = currentMessageElement.childNodes[1].nodeValue + response.response;
+       } else {
+           currentMessageElement = appendMessage('Chatbot', response.response);
+       }
+       if (response.done) {
+           pushMessage('Chatbot',currentMessageElement.innerHTML.substring(26, currentMessageElement.innerHTML.length));
+           currentMessageElement = null;
+       }
+   }
+  
+       // Assuming you want to target an element with the ID 'element_selector'
+       var element = document.getElementById('message-container');
+       var elementTarget = document.getElementById('message-input');
+  
+       // Set the scrollTop property to the height of the element
+  
+  
+   function appendMessage(sender, text) {
+       const messageElement = document.createElement('div');
+       messageElement.innerHTML = `<strong>${sender}:</strong> ${text}`;
+       messageContainer.appendChild(messageElement);
+       return messageElement;
+   }
+       // Function to push message to Firebase
+   function pushMessage(sender, message) {
+       firebase.database().ref('messages').push({
+           sender: sender,
+           message: message
+       });
+   }
+  
+   const userInput = document.getElementById('user-input');
+   const micImg = document.getElementById('mic-img');
+   const recognition = new webkitSpeechRecognition();
+  
+   recognition.continuous = true;
+   recognition.interimResults = true;
+  
+   let isListening = false;
+   let capturedText = '';
+  
+   
+   recognition.onresult = function(event) {
+       const result = event.results[event.results.length - 1];
+       const transcript = result[0].transcript.trim();
+       const lastWord = transcript.split(' ').pop(); // Get the last word from the transcript
+       if (!capturedText.includes(lastWord)) {
+           capturedText += lastWord + ' '; // Add the last word if it's not already included
+       }
+       console.log(capturedText);
+   };
+  
+  
+   function startListening() {
+       isListening = true;
+       micImg.src = "./icons8-microphone-24 (1).png"; // Change to the microphone icon for listening
+       capturedText = ''; // Reset captured text
+       recognition.start();
+   }
+  
+   function stopListening() {
+       isListening = false;
+       micImg.src = "./icons8-microphone-24.png"; // Change back to the original microphone icon
+       recognition.stop();
+       messageInput.value = capturedText.trim(); // Set the input field value to the captured text
+       sendMessage(); // Send the captured text as a message
+   }
+  
+   function toggleListening() {
+       if (!isListening) {
+           startListening();
+       } else {
+           stopListening();
+       }
+   }
+  
+  </script>
+</body>
+
+</html>
